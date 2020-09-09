@@ -1,0 +1,26 @@
+sudo: required
+services:
+    - docker
+
+before_install:
+    - docker build -t jdonov/multi-react-test -f ./client/Dockerfile.dev ./client
+
+script:
+    - docker run jdonov/multi-react-test npm test -- --coverage
+
+after_success:
+    - docker build -t jdonov/multi-client ./client
+    - docker build -t jdonov/multi-nginx ./nginx
+    - docker build -t jdonov/multi-server ./server
+    - docker build -t jdonov/multi-worker ./worker
+# Log in to the docker CLI
+    - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_ID" --password-stdin
+# Take those images and push them to docker hub
+    - docker push jdonov/multi-client
+    - docker push jdonov/multi-nginx
+    - docker push jdonov/multi-server
+    - docker push jdonoc/multi-worker
+    
+
+
+
